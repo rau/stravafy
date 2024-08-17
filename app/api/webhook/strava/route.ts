@@ -185,7 +185,7 @@ async function updateActivityDescription(
 
 	const updatedDescription = `${
 		originalDescription ? originalDescription + "\n\n" : ""
-	}Songs played during this activity:\n${songsDescription}`
+	}Songs I listened to (from stravafy.vercel.app):\n${songsDescription}`
 
 	const response = await fetch(
 		`https://www.strava.com/api/v3/activities/${activityId}`,
