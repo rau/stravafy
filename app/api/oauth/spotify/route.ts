@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 		client_id: process.env.SPOTIFY_CLIENT_ID!,
 		response_type: "code",
 		scope: "user-read-private user-read-email user-read-recently-played user-read-playback-state user-read-currently-playing user-read-playback-position user-top-read user-read-recently-played",
-		redirect_uri: `http://localhost:3000/api/callback/spotify`,
+		redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback/spotify`,
 		state: idToken,
 	})
 

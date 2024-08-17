@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 			body: new URLSearchParams({
 				grant_type: "authorization_code",
 				code: code!,
-				redirect_uri: `http://localhost:3000/api/callback/spotify`,
+				redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback/spotify`,
 			}),
 		})
 
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 			expiresAt: Math.floor(Date.now() / 1000) + data.expires_in,
 		})
 
-		return NextResponse.redirect("http://localhost:3000")
+		return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}`)
 	} catch (error) {
 		console.error("Error in Spotify callback:", error)
 		return NextResponse.json(

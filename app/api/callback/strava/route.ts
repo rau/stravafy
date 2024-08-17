@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
 			{ merge: true }
 		)
 
-		return NextResponse.redirect("http://localhost:3000")
+		return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}`)
 	} catch (error) {
 		console.error("Error in Strava callback:", error)
 		return NextResponse.json(

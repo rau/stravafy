@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 		response_type: "code",
 		approval_prompt: "force",
 		scope: "read,read_all,profile:read_all,profile:write,activity:read,activity:read_all,activity:write",
-		redirect_uri: `http://localhost:3000/api/callback/strava?idToken=${idToken}`,
+		redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/callback/strava?idToken=${idToken}`,
 	})
 
 	const authUrl = `https://www.strava.com/oauth/authorize?${queryParams.toString()}`
