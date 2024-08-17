@@ -18,7 +18,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
 	const body = await req.json()
-	console.log("🚀 ~ POST ~ body:", body)
 
 	if (body.object_type === "activity") {
 		try {
@@ -43,16 +42,11 @@ export async function POST(req: NextRequest) {
 					activityDetails.elapsed_time
 				)
 
-				const updatedDescription = await updateActivityDescription(
+				await updateActivityDescription(
 					body.object_id,
 					stravaData.accessToken,
 					activityDetails.description,
 					spotifyTracks
-				)
-
-				console.log(
-					"🚀 ~ POST ~ updatedDescription:",
-					updatedDescription
 				)
 
 				return NextResponse.json({ success: true })

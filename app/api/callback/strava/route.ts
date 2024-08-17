@@ -54,16 +54,17 @@ export async function GET(req: NextRequest) {
 				body: JSON.stringify({
 					client_id: process.env.STRAVA_CLIENT_ID,
 					client_secret: process.env.STRAVA_CLIENT_SECRET,
-					callback_url: `https://datis.serveo.net/api/webhook/strava`,
+					callback_url:
+						process.env.NODE_ENV === "development"
+							? "https://datis.serveo.net/api/webhook/strava"
+							: `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhook/strava`,
 					verify_token: process.env.STRAVA_WEBHOOK_VERIFY_TOKEN,
 				}),
 			}
 		)
 
 		const webhookData = await webhookResponse.json()
-		console.log("🚀 ~ GET ~ webhookData:", webhookData)
 
-		// Store webhook subscription ID
 		await setDoc(
 			doc(db, "strava", uid),
 			{ webhookSubscriptionId: webhookData.id },
