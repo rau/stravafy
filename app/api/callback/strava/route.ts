@@ -64,6 +64,7 @@ export async function GET(req: NextRequest) {
 		)
 
 		const webhookData = await webhookResponse.json()
+		console.log("🚀 ~ GET ~ webhookData:", webhookData)
 
 		await setDoc(
 			doc(db, "strava", uid),
