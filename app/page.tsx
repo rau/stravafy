@@ -42,8 +42,8 @@ const Home = () => {
 	const checkConnections = async (user: User) => {
 		const stravaConnected = await checkConnection("strava", user)
 		const spotifyConnected = await checkConnection("spotify", user)
-		// setIsStravaConnected(stravaConnected)
-		// setIsSpotifyConnected(spotifyConnected)
+		setIsStravaConnected(stravaConnected)
+		setIsSpotifyConnected(spotifyConnected)
 	}
 
 	const handleGoogleLogin = async () => {
