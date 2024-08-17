@@ -1,0 +1,24 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Global ignores
+node_modules/
+.DS_Store
+*.log
+*.tsbuildinfo
+
+# Frontend ignores
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env*.local
+
+# Backend ignores
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+backend/venv/
+
+# Shared ignores
+**/coverage/
+**/.vscode/
+**/dist/
