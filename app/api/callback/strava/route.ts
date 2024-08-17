@@ -43,6 +43,11 @@ export async function GET(req: NextRequest) {
 		})
 
 		// Set up webhook subscription
+		console.log(
+			process.env.NODE_ENV === "development"
+				? "https://stravafy.vercel.app/api/webhook/strava"
+				: `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhook/strava`
+		)
 		const webhookResponse = await fetch(
 			"https://www.strava.com/api/v3/push_subscriptions",
 			{
@@ -56,7 +61,7 @@ export async function GET(req: NextRequest) {
 					client_secret: process.env.STRAVA_CLIENT_SECRET,
 					callback_url:
 						process.env.NODE_ENV === "development"
-							? "https://datis.serveo.net/api/webhook/strava"
+							? "https://stravafy.vercel.app/api/webhook/strava"
 							: `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhook/strava`,
 					verify_token: process.env.STRAVA_WEBHOOK_VERIFY_TOKEN,
 				}),
