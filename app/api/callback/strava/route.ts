@@ -43,11 +43,6 @@ export async function GET(req: NextRequest) {
 		})
 
 		// Set up webhook subscription
-		console.log(
-			process.env.NODE_ENV === "development"
-				? "https://stravafy.vercel.app/api/webhook/strava"
-				: `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhook/strava`
-		)
 		const webhookResponse = await fetch(
 			"https://www.strava.com/api/v3/push_subscriptions",
 			{
@@ -69,8 +64,6 @@ export async function GET(req: NextRequest) {
 		)
 
 		const webhookData = await webhookResponse.json()
-		console.log("🚀 ~ GET ~ webhookData:", webhookData)
-
 		await setDoc(
 			doc(db, "strava", uid),
 			{ webhookSubscriptionId: webhookData.id },
