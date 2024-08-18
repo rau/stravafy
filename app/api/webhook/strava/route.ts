@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from "next/server"
 import { getFirestore } from "firebase-admin/firestore"
-import { initializeApp } from "firebase-admin"
+import { initAdmin } from "@/libs/firebaseAdmin"
 
-initializeApp()
+initAdmin()
 
 export async function GET(req: NextRequest) {
 	const mode = req.nextUrl.searchParams.get("hub.mode")
@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
 	const body = await req.json()
+	initAdmin()
 
 	if (body.object_type === "activity") {
 		try {
