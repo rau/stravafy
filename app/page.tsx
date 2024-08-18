@@ -1,33 +1,24 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { getAuth, onAuthStateChanged, User } from "firebase/auth"
-import { firebase } from "@/libs/firebase"
+import { useAuth } from "@/libs/useAuth"
 import { Connections } from "@/components/Connections"
 import { StravaActivities } from "@/components/StravaActivites"
 
 const Home = () => {
-	const auth = getAuth(firebase)
-	const [user, setUser] = useState<User | null>(null)
-	const [isUserLoaded, setIsUserLoaded] = useState(false)
+	const { user, loading } = useAuth()
 
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-			setUser(currentUser)
-			setIsUserLoaded(true)
-		})
-
-		return () => unsubscribe()
-	}, [auth])
-
-	if (!isUserLoaded) {
-		return <div>Loading...</div>
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+			</div>
+		)
 	}
 
 	return (
 		<>
-			{user && <Connections user={user} />}
-			{user && <StravaActivities user={user} />}
+			{user && <Connections />}
+			{user && <StravaActivities />}
 		</>
 	)
 }

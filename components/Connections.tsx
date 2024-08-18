@@ -1,19 +1,18 @@
+"use client"
+
 import { useState, useEffect } from "react"
-import { User } from "firebase/auth"
 import { Button } from "@/components/ui/Button"
 import { getIdToken } from "@/libs/firebase"
+import { useAuth } from "@/libs/useAuth"
 import Link from "next/link"
-
-interface ConnectedAccountsProps {
-	user: User | null
-}
 
 interface AccountInfo {
 	username: string
 	profileUrl: string
 }
 
-const Connections = ({ user }: ConnectedAccountsProps) => {
+const Connections = () => {
+	const { user } = useAuth()
 	const [isStravaConnected, setIsStravaConnected] = useState<boolean | null>(
 		null
 	)

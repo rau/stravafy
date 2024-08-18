@@ -1,28 +1,12 @@
+"use client"
+
 import { useState, useEffect } from "react"
-import { User } from "firebase/auth"
+
 import { getIdToken } from "@/libs/firebase"
+import { useAuth } from "@/libs/useAuth"
 
-interface Song {
-	name: string
-	artists: string[]
-	album: string
-}
-
-interface Activity {
-	id: string
-	name: string
-	type: string
-	start_date: string
-	distance: number
-	moving_time: number
-	songs: Song[] | null
-}
-
-interface StravaActivitiesProps {
-	user: User | null
-}
-
-const StravaActivities = ({ user }: StravaActivitiesProps) => {
+const StravaActivities = () => {
+	const { user } = useAuth()
 	const [activities, setActivities] = useState<Activity[]>([])
 	const [loading, setLoading] = useState(true)
 
@@ -36,9 +20,6 @@ const StravaActivities = ({ user }: StravaActivitiesProps) => {
 		try {
 			const idToken = await getIdToken()
 			const response = await fetch(`/api/strava?idToken=${idToken}`)
-			if (!response.ok) {
-				throw new Error("Failed to fetch recent activities")
-			}
 			const data = await response.json()
 			setActivities(data.activities)
 		} catch (error) {
@@ -49,10 +30,10 @@ const StravaActivities = ({ user }: StravaActivitiesProps) => {
 	}
 
 	if (loading) {
-		return <div>Loading recent activities...</div>
+		return null
 	}
 
-	if (!user || activities.length === 0) {
+	if (!user || !activities || activities.length === 0) {
 		return null
 	}
 
@@ -64,8 +45,8 @@ const StravaActivities = ({ user }: StravaActivitiesProps) => {
 			<ul className="space-y-8">
 				{activities.map((activity) => (
 					<li key={activity.id} className="border p-4 rounded-md">
-						<div className="flex justify-between">
-							<div>
+						<div className="flex justify-between w-full">
+							<div className="w-1/2">
 								<h3 className="font-semibold">
 									{activity.name}
 								</h3>
@@ -86,15 +67,10 @@ const StravaActivities = ({ user }: StravaActivitiesProps) => {
 									minutes
 								</p>
 							</div>
-							<div className="ml-4">
+							<div className="ml-4 w-1/2">
 								<h4 className="font-semibold">Songs</h4>
-								{activity.songs === null ? (
-									<p className="text-sm text-gray-500">
-										No songs found. This could be because no
-										music was played or the activity is too
-										old for Spotify to provide data.
-									</p>
-								) : activity.songs.length === 0 ? (
+								{activity.songs === null ||
+								activity.songs.length === 0 ? (
 									<p className="text-sm text-gray-500">
 										No songs found. This could be because no
 										music was played or the activity is too

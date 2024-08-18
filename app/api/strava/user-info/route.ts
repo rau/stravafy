@@ -37,6 +37,8 @@ export async function GET(req: NextRequest) {
 			},
 		})
 
+		console.log("userInfosTRAVA", response)
+
 		if (!response.ok) {
 			throw new Error("Failed to fetch Strava user info")
 		}
