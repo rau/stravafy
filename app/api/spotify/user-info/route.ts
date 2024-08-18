@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server"
 import { initAdmin } from "@/libs/firebaseAdmin"
 import { getFirestore } from "firebase-admin/firestore"
+import { refreshSpotifyToken } from "@/libs/tokenRefresh"
 
 export async function GET(req: NextRequest) {
 	const idToken = req.nextUrl.searchParams.get("idToken")
@@ -17,6 +18,8 @@ export async function GET(req: NextRequest) {
 		const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken)
 		const uid = decodedToken.uid
 
+		const spotifyToken = await refreshSpotifyToken(uid)
+
 		const db = getFirestore()
 		const spotifyDoc = await db.collection("spotify").doc(uid).get()
 		const spotifyData = spotifyDoc.data()
@@ -30,7 +33,7 @@ export async function GET(req: NextRequest) {
 
 		const response = await fetch("https://api.spotify.com/v1/me", {
 			headers: {
-				Authorization: `Bearer ${spotifyData.accessToken}`,
+				Authorization: `Bearer ${spotifyToken}`,
 			},
 		})
 
@@ -41,6 +44,7 @@ export async function GET(req: NextRequest) {
 		const userData = await response.json()
 
 		return NextResponse.json({
+			id: userData.id,
 			username: userData.display_name || userData.id,
 			profileUrl: userData.external_urls.spotify,
 		})

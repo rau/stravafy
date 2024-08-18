@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server"
 import { initAdmin } from "@/libs/firebaseAdmin"
 import { getFirestore } from "firebase-admin/firestore"
+import { refreshStravaToken, refreshSpotifyToken } from "@/libs/tokenRefresh"
 
 export async function GET(req: NextRequest) {
 	const idToken = req.nextUrl.searchParams.get("idToken")
@@ -21,84 +22,16 @@ export async function GET(req: NextRequest) {
 		const stravaDoc = await db.collection("strava").doc(uid).get()
 		const stravaData = stravaDoc.data()
 
-		if (!stravaData || !stravaData.accessToken) {
+		if (!stravaData) {
 			return NextResponse.json(
 				{ error: "Strava not connected" },
 				{ status: 400 }
 			)
 		}
 
-		const spotifyDoc = await db.collection("spotify").doc(uid).get()
-		const spotifyData = spotifyDoc.data()
-
-		// Fetch recent Strava activities
-		const stravaResponse = await fetch(
-			"https://www.strava.com/api/v3/athlete/activities?per_page=10",
-			{
-				headers: {
-					Authorization: `Bearer ${stravaData.accessToken}`,
-				},
-			}
-		)
-
-		if (!stravaResponse.ok) {
-			throw new Error("Failed to fetch Strava activities")
-		}
-
-		const activities = await stravaResponse.json()
-
-		// Fetch songs for each activity
-		const activitiesWithSongs = await Promise.all(
-			activities.map(async (activity: any) => {
-				let songs = null
-
-				if (spotifyData && spotifyData.accessToken) {
-					const spotifyAccessToken =
-						await refreshSpotifyTokenIfNeeded(uid, spotifyData)
-					const startTime = new Date(activity.start_date).getTime()
-					const endTime = startTime + activity.elapsed_time * 1000
-
-					const spotifyResponse = await fetch(
-						`https://api.spotify.com/v1/me/player/recently-played?limit=50&before=${endTime}`,
-						{
-							headers: {
-								Authorization: `Bearer ${spotifyAccessToken}`,
-							},
-						}
-					)
-
-					if (spotifyResponse.ok) {
-						const spotifyData = await spotifyResponse.json()
-						songs = spotifyData.items
-							.filter((item: any) => {
-								const playedAt = new Date(
-									item.played_at
-								).getTime()
-								return (
-									playedAt >= startTime && playedAt <= endTime
-								)
-							})
-							.map((item: any) => ({
-								name: item.track.name,
-								artists: item.track.artists.map(
-									(artist: any) => artist.name
-								),
-								album: item.track.album.name,
-							}))
-					} else {
-						console.error(
-							"Failed to fetch Spotify data for activity:",
-							activity.id
-						)
-					}
-				}
-
-				return {
-					...activity,
-					songs: songs,
-				}
-			})
-		)
+		const stravaAccessToken = await refreshStravaToken(uid)
+		const activities = await fetchStravaActivities(stravaAccessToken)
+		const activitiesWithSongs = await addSongsToActivities(uid, activities)
 
 		return NextResponse.json({ activities: activitiesWithSongs })
 	} catch (error) {
@@ -110,34 +43,78 @@ export async function GET(req: NextRequest) {
 	}
 }
 
-async function refreshSpotifyTokenIfNeeded(userId: string, spotifyData: any) {
-	if (Date.now() > spotifyData.expiresAt) {
-		const response = await fetch("https://accounts.spotify.com/api/token", {
-			method: "POST",
+async function fetchStravaActivities(accessToken: string): Promise<Activity[]> {
+	const response = await fetch(
+		"https://www.strava.com/api/v3/athlete/activities?per_page=10",
+		{
 			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: `Basic ${Buffer.from(
-					`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-				).toString("base64")}`,
+				Authorization: `Bearer ${accessToken}`,
 			},
-			body: new URLSearchParams({
-				grant_type: "refresh_token",
-				refresh_token: spotifyData.refreshToken,
-			}),
-		})
+		}
+	)
 
-		const data = await response.json()
-		const db = getFirestore()
-		await db
-			.collection("spotify")
-			.doc(userId)
-			.update({
-				accessToken: data.access_token,
-				expiresAt: Date.now() + data.expires_in * 1000,
-			})
-
-		return data.access_token
+	if (!response.ok) {
+		throw new Error("Failed to fetch Strava activities")
 	}
 
-	return spotifyData.accessToken
+	return response.json()
+}
+
+async function addSongsToActivities(
+	userId: string,
+	activities: Activity[]
+): Promise<Activity[]> {
+	const db = getFirestore()
+	const spotifyDoc = await db.collection("spotify").doc(userId).get()
+	const spotifyData = spotifyDoc.data()
+
+	if (!spotifyData) {
+		return activities
+	}
+
+	const spotifyAccessToken = await refreshSpotifyToken(userId)
+
+	return Promise.all(
+		activities.map(async (activity) => {
+			const songs = await fetchSongsForActivity(
+				spotifyAccessToken,
+				activity
+			)
+			return { ...activity, songs }
+		})
+	)
+}
+
+async function fetchSongsForActivity(
+	accessToken: string,
+	activity: Activity
+): Promise<Song[] | null> {
+	const startTime = new Date(activity.start_date).getTime()
+	const endTime = startTime + activity.moving_time * 1000
+
+	const response = await fetch(
+		`https://api.spotify.com/v1/me/player/recently-played?limit=50&before=${endTime}`,
+		{
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		}
+	)
+
+	if (!response.ok) {
+		console.error("Failed to fetch Spotify data for activity:", activity.id)
+		return null
+	}
+
+	const spotifyData = await response.json()
+	return spotifyData.items
+		.filter((item: any) => {
+			const playedAt = new Date(item.played_at).getTime()
+			return playedAt >= startTime && playedAt <= endTime
+		})
+		.map((item: any) => ({
+			name: item.track.name,
+			artists: item.track.artists.map((artist: any) => artist.name),
+			album: item.track.album.name,
+		}))
 }
