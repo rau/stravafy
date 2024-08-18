@@ -12,12 +12,12 @@ const firebaseConfig = {
 
 // Check if there are no initialized apps
 const apps = getApps()
-const app = apps.length ? getApp() : initializeApp(firebaseConfig)
+const firebase = apps.length ? getApp() : initializeApp(firebaseConfig)
 
-export default app
+export { firebaseConfig, firebase }
 
 export const getIdToken = async () => {
-	const auth = getAuth(app)
+	const auth = getAuth(firebase)
 	const user = auth.currentUser
 
 	if (user) {

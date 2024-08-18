@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getAuth, onAuthStateChanged, User } from "firebase/auth"
-import firebase from "@/libs/firebase"
+import { firebase } from "@/libs/firebase"
 import { Connections } from "@/components/Connections"
 import { StravaActivities } from "@/components/StravaActivites"
 

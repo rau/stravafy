@@ -9,7 +9,7 @@ import {
 	signInWithPopup,
 	signInWithRedirect,
 } from "firebase/auth"
-import firebase from "@/libs/firebase"
+import { firebase } from "@/libs/firebase"
 import { Toaster } from "react-hot-toast"
 import "@/app/globals.css"
 import { Inter } from "next/font/google"
