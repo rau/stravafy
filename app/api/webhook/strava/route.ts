@@ -1,5 +1,7 @@
 import { NextResponse, NextRequest } from "next/server"
 import { getFirestore } from "firebase-admin/firestore"
+import firebase from "@/libs/firebase"
+import { getAuth } from "@firebase/auth"
 
 export async function GET(req: NextRequest) {
 	const mode = req.nextUrl.searchParams.get("hub.mode")
@@ -18,6 +20,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
 	const body = await req.json()
+	getAuth(firebase)
 
 	if (body.object_type === "activity") {
 		try {

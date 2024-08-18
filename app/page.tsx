@@ -12,10 +12,10 @@ import {
 	onAuthStateChanged,
 	User,
 } from "firebase/auth"
-import { Connections } from "@/components/Connections"
-import { StravaActivities } from "@/components/StravaActivites"
 import firebase from "@/libs/firebase"
 import toast from "react-hot-toast"
+import { Connections } from "@/components/Connections"
+import { StravaActivities } from "@/components/StravaActivites"
 
 const Home = () => {
 	const auth = getAuth(firebase)
@@ -59,41 +59,37 @@ const Home = () => {
 	}
 
 	return (
-		<div className="flex w-screen flex-col gap-2 overflow-x-auto text-slate-700 p-8 items-center">
-			<div className="w-[64rem] flex flex-col gap-2">
-				<div className="flex flex-row justify-between w-full">
-					<h1 className="text-2xl font-bold">Stravafy</h1>
-					<div className="flex flex-row justify-between gap-2 items-center">
-						{user ? (
-							<Button onClick={() => auth.signOut()}>
-								Logout
-							</Button>
-						) : (
-							<Button
-								onClick={handleGoogleLogin}
-								disabled={googleIsLoading}
-							>
-								{googleIsLoading ? "Loading..." : "Login"}
-							</Button>
+		<>
+			<div className="flex flex-row justify-between w-full">
+				<h1 className="text-2xl font-bold">Stravafy</h1>
+				<div className="flex flex-row justify-between gap-2 items-center">
+					{user ? (
+						<Button onClick={() => auth.signOut()}>Logout</Button>
+					) : (
+						<Button
+							onClick={handleGoogleLogin}
+							disabled={googleIsLoading}
+						>
+							{googleIsLoading ? "Loading..." : "Login"}
+						</Button>
+					)}
+					<div className="flex flex-row justify-center items-center gap-2">
+						{user && user.photoURL && (
+							<Image
+								src={user.photoURL}
+								alt="Profile Picture"
+								width={36}
+								height={36}
+								className="rounded-full"
+							/>
 						)}
-						<div className="flex flex-row justify-center items-center gap-2">
-							{user && user.photoURL && (
-								<Image
-									src={user.photoURL}
-									alt="Profile Picture"
-									width={36}
-									height={36}
-									className="rounded-full"
-								/>
-							)}
-						</div>
 					</div>
 				</div>
-
-				<Connections user={user} />
-				<StravaActivities user={user} />
 			</div>
-		</div>
+
+			<Connections user={user} />
+			{user && <StravaActivities user={user} />}
+		</>
 	)
 }
 
