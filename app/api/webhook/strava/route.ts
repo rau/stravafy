@@ -180,10 +180,10 @@ async function updateActivityDescription(
 
 	const songsDescription = songsList
 		.map(
-			(song) =>
-				`${song.name} by ${song.artists.join(", ")} (${new Date(
-					song.played_at
-				).toLocaleTimeString()})`
+			(song, index) =>
+				`${index + 1}. ${song.name} by ${song.artists.join(
+					", "
+				)} (${new Date(song.played_at).toLocaleTimeString()})`
 		)
 		.join("\n")
 
