@@ -47,7 +47,7 @@ export default function RootLayout({
 	)
 }
 
-export const MainContent = ({ children }: { children: React.ReactNode }) => {
+const MainContent = ({ children }: { children: React.ReactNode }) => {
 	const { user } = useAuth()
 	const auth = getAuth(firebase)
 	const [googleIsLoading, setGoogleIsLoading] = useState(false)
