@@ -29,9 +29,17 @@ export async function GET(req: NextRequest) {
 			)
 		}
 
-		const stravaAccessToken = await refreshStravaToken(uid)
+		const [stravaAccessToken, spotifyAccessToken] = await Promise.all([
+			refreshStravaToken(uid),
+			refreshSpotifyToken(uid),
+		])
+
 		const activities = await fetchStravaActivities(stravaAccessToken)
-		const activitiesWithSongs = await addSongsToActivities(uid, activities)
+		const activitiesWithSongs = await addSongsToActivities(
+			uid,
+			activities,
+			spotifyAccessToken
+		)
 
 		return NextResponse.json({ activities: activitiesWithSongs })
 	} catch (error) {
@@ -62,7 +70,8 @@ async function fetchStravaActivities(accessToken: string): Promise<Activity[]> {
 
 async function addSongsToActivities(
 	userId: string,
-	activities: Activity[]
+	activities: Activity[],
+	spotifyAccessToken: string
 ): Promise<Activity[]> {
 	const db = getFirestore()
 	const spotifyDoc = await db.collection("spotify").doc(userId).get()
@@ -71,8 +80,6 @@ async function addSongsToActivities(
 	if (!spotifyData) {
 		return activities
 	}
-
-	const spotifyAccessToken = await refreshSpotifyToken(userId)
 
 	return Promise.all(
 		activities.map(async (activity) => {

@@ -39,22 +39,22 @@ const Connections = () => {
 		if (user) {
 			setIsLoading(true)
 			try {
-				const [stravaConnected, spotifyConnected] = await Promise.all([
+				const [
+					stravaConnected,
+					spotifyConnected,
+					stravaInfo,
+					spotifyInfo,
+				] = await Promise.all([
 					checkConnection("strava"),
 					checkConnection("spotify"),
+					fetchAccountInfo("strava"),
+					fetchAccountInfo("spotify"),
 				])
 
 				setIsStravaConnected(stravaConnected)
 				setIsSpotifyConnected(spotifyConnected)
-
-				if (stravaConnected) {
-					const info = await fetchAccountInfo("strava")
-					setStravaInfo(info)
-				}
-				if (spotifyConnected) {
-					const info = await fetchAccountInfo("spotify")
-					setSpotifyInfo(info)
-				}
+				if (stravaConnected) setStravaInfo(stravaInfo)
+				if (spotifyConnected) setSpotifyInfo(spotifyInfo)
 			} catch (error) {
 				console.error("Error checking connections:", error)
 			} finally {
