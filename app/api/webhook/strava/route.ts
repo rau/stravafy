@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from "next/server"
 import { getFirestore } from "firebase-admin/firestore"
-import { firebaseConfig } from "@/libs/firebase"
-import { getApp, getApps, initializeApp } from "@firebase/app"
+import { initializeApp } from "firebase-admin"
+
+initializeApp()
 
 export async function GET(req: NextRequest) {
 	const mode = req.nextUrl.searchParams.get("hub.mode")
@@ -20,8 +21,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
 	const body = await req.json()
-	const apps = getApps()
-	apps.length ? getApp() : initializeApp(firebaseConfig)
 
 	if (body.object_type === "activity") {
 		try {
@@ -72,6 +71,7 @@ export async function POST(req: NextRequest) {
 
 	return NextResponse.json({ success: true })
 }
+
 async function getStravaActivityDetails(
 	activityId: string,
 	accessToken: string
