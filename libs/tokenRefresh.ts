@@ -51,10 +51,11 @@ export const refreshSpotifyToken = async (userId: string): Promise<string> => {
 	const spotifyDoc = await db.collection("spotify").doc(userId).get()
 	const spotifyData = spotifyDoc.data() as TokenData
 
-	if (Math.floor(Date.now() / 1000) < spotifyData.expiresAt) {
-		return spotifyData.accessToken
-	}
+	// if (Math.floor(Date.now() / 1000) < spotifyData.expiresAt) {
+	// 	return spotifyData.accessToken
+	// }
 
+	console.log(spotifyData)
 	const response = await fetch("https://accounts.spotify.com/api/token", {
 		method: "POST",
 		headers: {
@@ -70,6 +71,7 @@ export const refreshSpotifyToken = async (userId: string): Promise<string> => {
 	})
 
 	const data = await response.json()
+	console.log("🚀 ~ refreshSpotifyToken ~ data:", data)
 
 	if (!response.ok) {
 		throw new Error("Failed to refresh Spotify token")
