@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server"
 import { getFirestore } from "firebase-admin/firestore"
 import { initAdmin } from "@/libs/firebaseAdmin"
+import { refreshStravaToken } from "@/libs/tokenRefresh"
 
 initAdmin()
 
@@ -36,9 +37,11 @@ export async function POST(req: NextRequest) {
 				const userId = stravaDoc.id
 				const stravaData = stravaDoc.data()
 
+				const accessToken = await refreshStravaToken(userId)
+
 				const activityDetails = await getStravaActivityDetails(
 					body.object_id,
-					stravaData.accessToken
+					accessToken
 				)
 				const spotifyTracks = await getSpotifyTracksForActivity(
 					userId,
